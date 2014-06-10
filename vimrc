@@ -99,25 +99,6 @@ nmap <silent> <leader>/ :nohlsearch<CR>
 
 let g:ctrlp_custom_ignore = {'file': '\v(\.pyc|\.swp)$'}
 
-" pyflakes
-
-" do not use quickfix with pyflakes
-let g:pyflakes_use_quickfix = 0
-
-" flake8
-
-" ignore white space of empty line warning for flake8
-let g:flake8_ignore="W293"
-let g:flake8_max_line_length=99
-" autorun flake8 on save
-autocmd BufWritePost *.py call Flake8()
-
-" supertab
-
-au FileType python set omnifunc=pythoncomplete#Complete
-let g:SuperTabDefaultCompletionType = "context"
-set completeopt=menuone,longest,preview
-
 " pathogen
 
 call pathogen#infect()
@@ -139,29 +120,24 @@ endif
 
 se guioptions=agim
 
-" abbreviate for Python pdb
-abb pdb; import pdb; pdb.set_trace()
-
-
 if has("gui_macvim")
     source ~/.vim/mvimrc
 endif
 
+" python
+autocmd FileType python setlocal et sta sw=4 sts=4
+autocmd FileType python setlocal foldmethod=indent
+set foldlevel=99
 
-" open browser plugin
-let g:netrw_nogx = 1 " disable netrw's gx mapping.
-nmap gx <Plug>(openbrowser-smart-search)
-vmap gx <Plug>(openbrowser-smart-search)
+" pyflakes
+" do not use quickfix with pyflakes
+let g:pyflakes_use_quickfix = 0
 
-" https://coderwall.com/p/nckasg
-:command WQ wq
-:command Wq wq
-:command W w
-:command Q q
+" flake8
+" ignore white space of empty line warning for flake8
+let g:flake8_ignore="W293"
+let g:flake8_max_line_length=99
+" autorun flake8 on save
+autocmd BufWritePost *.py call Flake8()
 
-" more natural movement between splits with Ctrl-hjkl
-" http://robots.thoughtbot.com/vim-splits-move-faster-and-more-naturally
-nnoremap <C-J> <C-W><C-J>
-nnoremap <C-K> <C-W><C-K>
-nnoremap <C-L> <C-W><C-L>
-nnoremap <C-H> <C-W><C-H>
+
