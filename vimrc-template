@@ -6,6 +6,9 @@ filetype plugin on
 syntax enable
 
 
+" eclipse elim settings
+set nocompatible
+
 " http://stackoverflow.com/questions/58774/how-do-you-paste-multiple-tabbed-lines-into-vi
 set pastetoggle=<F6>    " F6 toggles paste mode
 set ignorecase          " Don't care about case...
@@ -50,6 +53,30 @@ abb uuk set keymap=ukr
 " A-] - Open the definition in a vertical split
 map <C-\> :tab split<CR>:exec("tag ".expand("<cword>"))<CR>
 map <A-]> :vsp <CR>:exec("tag ".expand("<cword>"))<CR>
+
+
+" Evoke a web browser
+function! Browser ()
+  let line0 = getline (".")
+  let line = matchstr (line0, "http[^ >]*")
+  :if line==""
+  let line = matchstr (line0, "ftp[^ >]*")
+  :endif
+  :if line==""
+  let line = matchstr (line0, "file[^ >]*")
+  :endif
+  let line = escape (line, "#?&;|%")
+  " echo line
+  exec ":silent !google-chrome ".line
+endfunction
+
+
+" Evoke evince (pdf viewer)
+function! Evince()
+  let line = getline (".")
+  echo line
+  exec ':silent !evince ' . "\"" . line . "\""
+endfunction
 
 
 " F-keys mappings
@@ -138,6 +165,55 @@ else
 endif
 
 se guioptions=agim
+
+" flavored-markdown
+" https://github.com/jtratner/vim-flavored-markdown
+augroup markdown
+    au!
+    au BufNewFile,BufRead *.md,*.markdown,*.md.in setlocal filetype=ghmarkdown
+augroup END
+
+
+" Link to Spotify
+nnoremap <Leader>al :call AddLink()<CR>
+function! AddLink()
+  let url = getline (".")
+  let url = matchstr (url, "http[^ >]*")
+  if empty(url)
+    return
+  endif
+  let html = system('wget -q -O - ' . shellescape(url))
+  let regex = '\c.*head.*<title[^>]*>\_s*\zs.\{-}\ze\_s*<\/title>'
+  let regex_artist = '\cby \zs.\{-}\ze on Spotify'
+  let regex_title = '\c\zs.\{-}\ze by '
+  let url_title = substitute(matchstr(html, regex), "\n", ' ', 'g')
+  let url_title = substitute(matchstr(html, regex), "\n", ' ', 'g')
+  let title = matchstr(url_title, regex_title)
+  let artist = matchstr(url_title, regex_artist)
+  if empty(title)
+    let title = 'Unknown'
+  endif
+  exe "normal 0c$[".title." - ".artist."](".url.')'
+endfunction
+
+
+" URL to Markdown link
+nnoremap <Leader>ll :call AddMarkdownLink()<CR>
+function! AddMarkdownLink()
+  let url = getline (".")
+  let url = matchstr (url, "http[^ >]*")
+  if empty(url)
+    return
+  endif
+  let html = system('wget -q -O - ' . shellescape(url))
+  let regex = '\c.*head.*<title[^>]*>\_s*\zs.\{-}\ze\_s*<\/title>'
+  let url_title = substitute(matchstr(html, regex), "\n", ' ', 'g')
+  if empty(url_title)
+    let url_title = url
+  endif
+  exe "normal 0c$[".url_title."](".url.")"
+endfunction
+
 
 " abbreviate for Python pdb
 abb pdb; import pdb; pdb.set_trace()
